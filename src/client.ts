@@ -416,6 +416,13 @@ export class LiteClient {
         return this.#blockHeader.load(block);
     }
 
+    getBlock = async (block: BlockID) => {
+        return this.engine.query(Functions.liteServer_getBlock, {
+            kind: 'liteServer.getBlock',
+            id: block,
+        })
+    }
+
     getAllShardsInfo = async (block: BlockID) => {
         return this.#shardsLockup.load(block);
     }

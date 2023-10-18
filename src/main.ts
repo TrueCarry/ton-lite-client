@@ -71,6 +71,9 @@ async function main() {
         const res = await client.getMasterchainInfo({ timeout: 15000, awaitSeqno: latest.last.seqno + 2 })
         console.log('wait res', Date.now() - start, res)
 
+        const data = await client.getFullBlock(9759413)
+        console.log('data', data, data.shards.map(s => BigInt.asUintN(64, BigInt(s.shard)).toString(16).padStart(16, '0')))
+
         await new Promise((resolve, reject) => setTimeout(resolve, 3000));
     }
 }
