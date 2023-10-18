@@ -795,29 +795,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@truecarry/ton-lite-client@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "@truecarry/ton-lite-client@workspace:."
-  dependencies:
-    "@types/node": ^17.0.27
-    "@types/pegjs": ^0.10.3
-    adnl: ^1.0.3
-    dataloader: ^2.1.0
-    jest: ^27.5.1
-    lru_map: ^0.4.1
-    pegjs: ^0.10.0
-    teslabot: ^1.5.0
-    ton-core: ^0.49.0
-    ton-crypto: ^3.2.0
-    ton-tl: ^1.0.1
-    ts-node: ^10.7.0
-    tweetnacl: ^1.0.3
-    typescript: ^4.6.3
-  peerDependencies:
-    ton-core: "*"
-  languageName: unknown
-  linkType: soft
-
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.9
   resolution: "@tsconfig/node10@npm:1.0.9"

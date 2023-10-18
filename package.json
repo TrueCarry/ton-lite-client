@@ -29,6 +29,7 @@
     "ton-tl": "^1.0.1",
     "tweetnacl": "^1.0.3"
   },
+  "packageManager": "yarn@3.4.1",
   "peerDependencies": {
     "@ton/core": "*"
   },
