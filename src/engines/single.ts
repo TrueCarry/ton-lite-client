@@ -117,10 +117,13 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
 
     close() {
         this.#closed = true;
+        if (this.#currentClient) {
+            this.#currentClient.end();
+        } 
     }
 
     private connect() {
-        if (this.#connecting) {
+        if (this.#connecting || this.#closed) {
             return
         }
 
