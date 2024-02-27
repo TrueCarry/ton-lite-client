@@ -28,6 +28,12 @@ export class LiteRoundRobinEngine extends EventEmitter implements LiteEngine {
         }
     }
 
+    reconnect(): void {
+        for (const engine of this.allEngines) {
+            engine.reconnect()
+        }
+    }
+
     addSingleEngine(engine: LiteEngine) {
         const existing = this.allEngines.find(e => e === engine)
         if (existing) {
@@ -56,6 +62,10 @@ export class LiteRoundRobinEngine extends EventEmitter implements LiteEngine {
     async query<REQ, RES>(f: TLFunction<REQ, RES>, req: REQ, args?: { timeout?: number, awaitSeqno?: number }): Promise<RES> {
         if(this.#closed) {
             throw new Error('Engine is closed');
+        }
+
+        if (this.readyEngines.length === 0) {
+            this.reconnect()
         }
 
         let attempts = 0

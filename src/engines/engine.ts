@@ -15,6 +15,7 @@ export interface LiteEngine {
     close(): void;
     isClosed(): boolean;
     isReady(): boolean;
+    reconnect(): void;
 
     emit(event: 'connect'): boolean;
     emit(event: 'ready'): boolean;

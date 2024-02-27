@@ -30,18 +30,28 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
     readonly publicKey: Buffer;
     #currentClient: ADNLClient | null = null;
     #ready = false;
-    #closed = true;
+    #closed = false;
     #queries: Map<string, QueryReference> = new Map();
     #clientType: 'tcp' | 'ws'
     #reconnectTimeout: number
+    #connectTimeout: number
+    #connecting = false;
+    #reconnectAwait: ReturnType<typeof setTimeout> | undefined
 
-    constructor(args: { host: string, publicKey: Buffer, client?: 'tcp' | 'ws', reconnectTimeout?: number }) {
+    constructor(args: {
+        host: string,
+        publicKey: Buffer,
+        client?: 'tcp' | 'ws',
+        reconnectTimeout?: number,
+        connectTimeout?: number
+    }) {
         super()
 
         this.host = args.host;
         this.publicKey = args.publicKey;
-        this.#clientType = args.client || 'tcp'
-        this.#reconnectTimeout = args.reconnectTimeout || 10000
+        this.#clientType = args.client ?? 'tcp'
+        this.#reconnectTimeout = args.reconnectTimeout ?? 10000
+        this.#connectTimeout = args.connectTimeout ?? 3000
         this.connect();
     }
 
@@ -51,6 +61,10 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
 
     isReady() {
         return this.#ready
+    }
+
+    reconnect(): void {
+        this.connect()
     }
 
     async query<REQ, RES>(f: TLFunction<REQ, RES>, req: REQ, queryArgs?: { timeout?: number, awaitSeqno?: number }): Promise<RES> {
@@ -103,15 +117,15 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
 
     close() {
         this.#closed = true;
-        if (this.#currentClient) {
-            let c = this.#currentClient!;
-            this.#ready = false;
-            this.#currentClient = null;
-            c.end();
-        }
     }
 
     private connect() {
+        if (this.#connecting) {
+            return
+        }
+
+        this.#connecting = true
+
         // Configure new client
         const client = this.#clientType === 'ws' ? new ADNLClientWS(
             this.host,
@@ -129,8 +143,9 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
         })
         client.on('close', () => {
             if (this.#currentClient === client) {
-                this.onClosed();
+                this.onClosed(client);
                 this.emit('close')
+                this.#connecting = false
             }
         });
         client.on('data', (data) => {
@@ -142,24 +157,39 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
             if (this.#currentClient === client) {
                 this.onReady();
                 this.emit('ready')
+                this.#connecting = false
             }
         });
         client.on('error', (err) => {
-            this.close()
-            this.emit('error')
+            this.onClosed(client)
+            this.emit('error', err)
 
-            setTimeout(() => {
-                this.#closed = false
-                this.connect();
-            }, 30000)
+            if (this.#currentClient === client) {
+                this.#connecting = false
+
+                if (!this.#reconnectAwait) {
+                    this.#reconnectAwait = setTimeout(() => {
+                        this.#reconnectAwait = undefined;
+                        if (this.#currentClient === client) {
+                            this.connect();
+                        }
+                    }, this.#reconnectTimeout)
+                }
+            }
         })
+
+        setTimeout(() => {
+            if (this.#currentClient === client && this.#connecting) {
+                client.end()
+            }
+        }, this.#connectTimeout)
 
         // Persist client
         this.#currentClient = client;
     }
 
     private onConencted = () => {
-        this.#closed = false
+        // this.#closed = false
     }
 
     private onReady = () => {
@@ -197,13 +227,22 @@ export class LiteSingleEngine extends EventEmitter implements LiteEngine {
         }
     }
 
-    private onClosed = () => {
-        this.#currentClient = null;
-        this.#ready = false;
-        setTimeout(() => {
-            if (!this.#closed) {
-                this.connect();
-            }
-        }, this.#reconnectTimeout);
+    private onClosed = (client?: ADNLClient) => {
+        if (this.#currentClient === client) {
+            let c = this.#currentClient!;
+            this.#ready = false;
+            this.#currentClient = null;
+            c.end();
+        }
+
+        
+        if (!this.#reconnectAwait) {
+            this.#reconnectAwait = setTimeout(() => {
+                this.#reconnectAwait = undefined;
+                if (!this.#closed) {
+                    this.connect();
+                }
+            }, this.#reconnectTimeout)
+        }
     }
 }
