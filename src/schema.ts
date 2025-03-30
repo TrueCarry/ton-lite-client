@@ -1,11 +1,3 @@
-/**
- * Copyright (c) Whales Corp. 
- * All Rights Reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 import { TLWriteBuffer, TLReadBuffer, TLFlag, TLInt, TLString, TLLong, TLInt256, TLInt128, TLBytes, TLBool, TLCodec, TLFunction } from "ton-tl";
 
 //
@@ -197,6 +189,15 @@ export interface liteServer_blockTransactions {
     readonly proof: TLBytes;
 }
 
+export interface liteServer_blockTransactionsExt {
+    readonly kind: 'liteServer.blockTransactionsExt';
+    readonly id: tonNode_blockIdExt;
+    readonly reqCount: TLFlag;
+    readonly incomplete: TLBool;
+    readonly transactions: TLBytes;
+    readonly proof: TLBytes;
+}
+
 export interface liteServer_signature {
     readonly kind: 'liteServer.signature';
     readonly nodeIdShort: TLInt256;
@@ -261,6 +262,15 @@ export interface liteServer_libraryResult {
     readonly result: liteServer_libraryEntry[];
 }
 
+export interface liteServer_libraryResultWithProof {
+    readonly kind: 'liteServer.libraryResultWithProof';
+    readonly id: tonNode_blockIdExt;
+    readonly mode: TLFlag;
+    readonly result: liteServer_libraryEntry[];
+    readonly stateProof: TLBytes;
+    readonly dataProof: TLBytes;
+}
+
 export interface liteServer_shardBlockLink {
     readonly kind: 'liteServer.shardBlockLink';
     readonly id: tonNode_blockIdExt;
@@ -273,9 +283,57 @@ export interface liteServer_shardBlockProof {
     readonly links: liteServer_shardBlockLink[];
 }
 
+export interface liteServer_lookupBlockResult {
+    readonly kind: 'liteServer.lookupBlockResult';
+    readonly id: tonNode_blockIdExt;
+    readonly mode: TLFlag;
+    readonly mcBlockId: tonNode_blockIdExt;
+    readonly clientMcStateProof: TLBytes;
+    readonly mcBlockProof: TLBytes;
+    readonly shardLinks: liteServer_shardBlockLink[];
+    readonly header: TLBytes;
+    readonly prevHeader: TLBytes;
+}
+
 export interface liteServer_debug_verbosity {
     readonly kind: 'liteServer.debug.verbosity';
     readonly value: TLInt;
+}
+
+export interface liteServer_nonfinal_candidateId {
+    readonly kind: 'liteServer.nonfinal.candidateId';
+    readonly blockId: tonNode_blockIdExt;
+    readonly creator: TLInt256;
+    readonly collatedDataHash: TLInt256;
+}
+
+export interface liteServer_nonfinal_candidate {
+    readonly kind: 'liteServer.nonfinal.candidate';
+    readonly id: liteServer_nonfinal_candidateId;
+    readonly data: TLBytes;
+    readonly collatedData: TLBytes;
+}
+
+export interface liteServer_nonfinal_candidateInfo {
+    readonly kind: 'liteServer.nonfinal.candidateInfo';
+    readonly id: liteServer_nonfinal_candidateId;
+    readonly available: TLBool;
+    readonly approvedWeight: TLLong;
+    readonly signedWeight: TLLong;
+    readonly totalWeight: TLLong;
+}
+
+export interface liteServer_nonfinal_validatorGroupInfo {
+    readonly kind: 'liteServer.nonfinal.validatorGroupInfo';
+    readonly nextBlockId: tonNode_blockId;
+    readonly ccSeqno: TLInt;
+    readonly prev: tonNode_blockIdExt[];
+    readonly candidates: liteServer_nonfinal_candidateInfo[];
+}
+
+export interface liteServer_nonfinal_validatorGroups {
+    readonly kind: 'liteServer.nonfinal.validatorGroups';
+    readonly groups: liteServer_nonfinal_validatorGroupInfo[];
 }
 
 //
@@ -330,6 +388,8 @@ export type liteServer_TransactionId3 = liteServer_transactionId3;
 
 export type liteServer_BlockTransactions = liteServer_blockTransactions;
 
+export type liteServer_BlockTransactionsExt = liteServer_blockTransactionsExt;
+
 export type liteServer_Signature = liteServer_signature;
 
 export type liteServer_SignatureSet = liteServer_signatureSet;
@@ -344,11 +404,25 @@ export type liteServer_ValidatorStats = liteServer_validatorStats;
 
 export type liteServer_LibraryResult = liteServer_libraryResult;
 
+export type liteServer_LibraryResultWithProof = liteServer_libraryResultWithProof;
+
 export type liteServer_ShardBlockLink = liteServer_shardBlockLink;
 
 export type liteServer_ShardBlockProof = liteServer_shardBlockProof;
 
+export type liteServer_LookupBlockResult = liteServer_lookupBlockResult;
+
 export type liteServer_debug_Verbosity = liteServer_debug_verbosity;
+
+export type liteServer_nonfinal_CandidateId = liteServer_nonfinal_candidateId;
+
+export type liteServer_nonfinal_Candidate = liteServer_nonfinal_candidate;
+
+export type liteServer_nonfinal_CandidateInfo = liteServer_nonfinal_candidateInfo;
+
+export type liteServer_nonfinal_ValidatorGroupInfo = liteServer_nonfinal_validatorGroupInfo;
+
+export type liteServer_nonfinal_ValidatorGroups = liteServer_nonfinal_validatorGroups;
 
 //
 // Functions
@@ -449,8 +523,27 @@ export interface liteServer_lookupBlock {
     readonly utime: TLInt | null;
 }
 
+export interface liteServer_lookupBlockWithProof {
+    readonly kind: 'liteServer.lookupBlockWithProof';
+    readonly mode: TLFlag;
+    readonly id: tonNode_blockId;
+    readonly mcBlockId: tonNode_blockIdExt;
+    readonly lt: TLLong | null;
+    readonly utime: TLInt | null;
+}
+
 export interface liteServer_listBlockTransactions {
     readonly kind: 'liteServer.listBlockTransactions';
+    readonly id: tonNode_blockIdExt;
+    readonly mode: TLFlag;
+    readonly count: TLFlag;
+    readonly after: liteServer_transactionId3 | null;
+    readonly reverseOrder: TLBool | null;
+    readonly wantProof: TLBool | null;
+}
+
+export interface liteServer_listBlockTransactionsExt {
+    readonly kind: 'liteServer.listBlockTransactionsExt';
     readonly id: tonNode_blockIdExt;
     readonly mode: TLFlag;
     readonly count: TLFlag;
@@ -493,9 +586,28 @@ export interface liteServer_getLibraries {
     readonly libraryList: TLInt256[];
 }
 
+export interface liteServer_getLibrariesWithProof {
+    readonly kind: 'liteServer.getLibrariesWithProof';
+    readonly id: tonNode_blockIdExt;
+    readonly mode: TLFlag;
+    readonly libraryList: TLInt256[];
+}
+
 export interface liteServer_getShardBlockProof {
     readonly kind: 'liteServer.getShardBlockProof';
     readonly id: tonNode_blockIdExt;
+}
+
+export interface liteServer_nonfinal_getValidatorGroups {
+    readonly kind: 'liteServer.nonfinal.getValidatorGroups';
+    readonly mode: TLFlag;
+    readonly wc: TLInt | null;
+    readonly shard: TLLong | null;
+}
+
+export interface liteServer_nonfinal_getCandidate {
+    readonly kind: 'liteServer.nonfinal.getCandidate';
+    readonly id: liteServer_nonfinal_candidateId;
 }
 
 export interface liteServer_queryPrefix {
@@ -595,10 +707,20 @@ export const Functions = {
         decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_BlockHeader.decode(decoder)
     } as TLFunction<liteServer_lookupBlock, liteServer_BlockHeader>,
 
+    liteServer_lookupBlockWithProof: {
+        encodeRequest: (src: liteServer_lookupBlockWithProof, encoder: TLWriteBuffer) => { encoder.writeInt32(-1677434888); Codecs.liteServer_lookupBlockWithProof.encode(src, encoder); },
+        decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_LookupBlockResult.decode(decoder)
+    } as TLFunction<liteServer_lookupBlockWithProof, liteServer_LookupBlockResult>,
+
     liteServer_listBlockTransactions: {
         encodeRequest: (src: liteServer_listBlockTransactions, encoder: TLWriteBuffer) => { encoder.writeInt32(-1375942694); Codecs.liteServer_listBlockTransactions.encode(src, encoder); },
         decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_BlockTransactions.decode(decoder)
     } as TLFunction<liteServer_listBlockTransactions, liteServer_BlockTransactions>,
+
+    liteServer_listBlockTransactionsExt: {
+        encodeRequest: (src: liteServer_listBlockTransactionsExt, encoder: TLWriteBuffer) => { encoder.writeInt32(7986524); Codecs.liteServer_listBlockTransactionsExt.encode(src, encoder); },
+        decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_BlockTransactionsExt.decode(decoder)
+    } as TLFunction<liteServer_listBlockTransactionsExt, liteServer_BlockTransactionsExt>,
 
     liteServer_getBlockProof: {
         encodeRequest: (src: liteServer_getBlockProof, encoder: TLWriteBuffer) => { encoder.writeInt32(-1964336060); Codecs.liteServer_getBlockProof.encode(src, encoder); },
@@ -625,10 +747,25 @@ export const Functions = {
         decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_LibraryResult.decode(decoder)
     } as TLFunction<liteServer_getLibraries, liteServer_LibraryResult>,
 
+    liteServer_getLibrariesWithProof: {
+        encodeRequest: (src: liteServer_getLibrariesWithProof, encoder: TLWriteBuffer) => { encoder.writeInt32(-646540355); Codecs.liteServer_getLibrariesWithProof.encode(src, encoder); },
+        decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_LibraryResultWithProof.decode(decoder)
+    } as TLFunction<liteServer_getLibrariesWithProof, liteServer_LibraryResultWithProof>,
+
     liteServer_getShardBlockProof: {
         encodeRequest: (src: liteServer_getShardBlockProof, encoder: TLWriteBuffer) => { encoder.writeInt32(1285948240); Codecs.liteServer_getShardBlockProof.encode(src, encoder); },
         decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_ShardBlockProof.decode(decoder)
     } as TLFunction<liteServer_getShardBlockProof, liteServer_ShardBlockProof>,
+
+    liteServer_nonfinal_getValidatorGroups: {
+        encodeRequest: (src: liteServer_nonfinal_getValidatorGroups, encoder: TLWriteBuffer) => { encoder.writeInt32(-1884213887); Codecs.liteServer_nonfinal_getValidatorGroups.encode(src, encoder); },
+        decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_nonfinal_ValidatorGroups.decode(decoder)
+    } as TLFunction<liteServer_nonfinal_getValidatorGroups, liteServer_nonfinal_ValidatorGroups>,
+
+    liteServer_nonfinal_getCandidate: {
+        encodeRequest: (src: liteServer_nonfinal_getCandidate, encoder: TLWriteBuffer) => { encoder.writeInt32(805803230); Codecs.liteServer_nonfinal_getCandidate.encode(src, encoder); },
+        decodeResponse: (decoder: TLReadBuffer) => Codecs.liteServer_nonfinal_Candidate.decode(decoder)
+    } as TLFunction<liteServer_nonfinal_getCandidate, liteServer_nonfinal_Candidate>,
 
     liteServer_queryPrefix: {
         encodeRequest: (src: liteServer_queryPrefix, encoder: TLWriteBuffer) => { encoder.writeInt32(1926489734); Codecs.liteServer_queryPrefix.encode(src, encoder); },
@@ -1021,6 +1158,24 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_blockTransactions>,
 
+    liteServer_blockTransactionsExt: {
+        encode: (src: liteServer_blockTransactionsExt, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockIdExt.encode(src.id, encoder);
+            encoder.writeUInt32(src.reqCount);
+            encoder.writeBool(src.incomplete);
+            encoder.writeBuffer(src.transactions);
+            encoder.writeBuffer(src.proof);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_blockTransactionsExt => {
+            let id = Codecs.tonNode_blockIdExt.decode(decoder);
+            let reqCount = decoder.readUInt32();
+            let incomplete = decoder.readBool();
+            let transactions = decoder.readBuffer();
+            let proof = decoder.readBuffer();
+            return { kind: 'liteServer.blockTransactionsExt', id, reqCount, incomplete, transactions, proof };
+        },
+    } as TLCodec<liteServer_blockTransactionsExt>,
+
     liteServer_signature: {
         encode: (src: liteServer_signature, encoder: TLWriteBuffer) => {
             encoder.writeInt256(src.nodeIdShort);
@@ -1149,6 +1304,24 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_libraryResult>,
 
+    liteServer_libraryResultWithProof: {
+        encode: (src: liteServer_libraryResultWithProof, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockIdExt.encode(src.id, encoder);
+            encoder.writeUInt32(src.mode);
+            encoder.writeVector(Codecs.liteServer_libraryEntry.encode, src.result);
+            encoder.writeBuffer(src.stateProof);
+            encoder.writeBuffer(src.dataProof);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_libraryResultWithProof => {
+            let id = Codecs.tonNode_blockIdExt.decode(decoder);
+            let mode = decoder.readUInt32();
+            let result = decoder.readVector(Codecs.liteServer_libraryEntry.decode);
+            let stateProof = decoder.readBuffer();
+            let dataProof = decoder.readBuffer();
+            return { kind: 'liteServer.libraryResultWithProof', id, mode, result, stateProof, dataProof };
+        },
+    } as TLCodec<liteServer_libraryResultWithProof>,
+
     liteServer_shardBlockLink: {
         encode: (src: liteServer_shardBlockLink, encoder: TLWriteBuffer) => {
             Codecs.tonNode_blockIdExt.encode(src.id, encoder);
@@ -1173,6 +1346,30 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_shardBlockProof>,
 
+    liteServer_lookupBlockResult: {
+        encode: (src: liteServer_lookupBlockResult, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockIdExt.encode(src.id, encoder);
+            encoder.writeUInt32(src.mode);
+            Codecs.tonNode_blockIdExt.encode(src.mcBlockId, encoder);
+            encoder.writeBuffer(src.clientMcStateProof);
+            encoder.writeBuffer(src.mcBlockProof);
+            encoder.writeVector(Codecs.liteServer_shardBlockLink.encode, src.shardLinks);
+            encoder.writeBuffer(src.header);
+            encoder.writeBuffer(src.prevHeader);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_lookupBlockResult => {
+            let id = Codecs.tonNode_blockIdExt.decode(decoder);
+            let mode = decoder.readUInt32();
+            let mcBlockId = Codecs.tonNode_blockIdExt.decode(decoder);
+            let clientMcStateProof = decoder.readBuffer();
+            let mcBlockProof = decoder.readBuffer();
+            let shardLinks = decoder.readVector(Codecs.liteServer_shardBlockLink.decode);
+            let header = decoder.readBuffer();
+            let prevHeader = decoder.readBuffer();
+            return { kind: 'liteServer.lookupBlockResult', id, mode, mcBlockId, clientMcStateProof, mcBlockProof, shardLinks, header, prevHeader };
+        },
+    } as TLCodec<liteServer_lookupBlockResult>,
+
     liteServer_debug_verbosity: {
         encode: (src: liteServer_debug_verbosity, encoder: TLWriteBuffer) => {
             encoder.writeInt32(src.value);
@@ -1182,6 +1379,78 @@ export const Codecs = {
             return { kind: 'liteServer.debug.verbosity', value };
         },
     } as TLCodec<liteServer_debug_verbosity>,
+
+    liteServer_nonfinal_candidateId: {
+        encode: (src: liteServer_nonfinal_candidateId, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockIdExt.encode(src.blockId, encoder);
+            encoder.writeInt256(src.creator);
+            encoder.writeInt256(src.collatedDataHash);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_candidateId => {
+            let blockId = Codecs.tonNode_blockIdExt.decode(decoder);
+            let creator = decoder.readInt256();
+            let collatedDataHash = decoder.readInt256();
+            return { kind: 'liteServer.nonfinal.candidateId', blockId, creator, collatedDataHash };
+        },
+    } as TLCodec<liteServer_nonfinal_candidateId>,
+
+    liteServer_nonfinal_candidate: {
+        encode: (src: liteServer_nonfinal_candidate, encoder: TLWriteBuffer) => {
+            Codecs.liteServer_nonfinal_candidateId.encode(src.id, encoder);
+            encoder.writeBuffer(src.data);
+            encoder.writeBuffer(src.collatedData);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_candidate => {
+            let id = Codecs.liteServer_nonfinal_candidateId.decode(decoder);
+            let data = decoder.readBuffer();
+            let collatedData = decoder.readBuffer();
+            return { kind: 'liteServer.nonfinal.candidate', id, data, collatedData };
+        },
+    } as TLCodec<liteServer_nonfinal_candidate>,
+
+    liteServer_nonfinal_candidateInfo: {
+        encode: (src: liteServer_nonfinal_candidateInfo, encoder: TLWriteBuffer) => {
+            Codecs.liteServer_nonfinal_candidateId.encode(src.id, encoder);
+            encoder.writeBool(src.available);
+            encoder.writeInt64(src.approvedWeight);
+            encoder.writeInt64(src.signedWeight);
+            encoder.writeInt64(src.totalWeight);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_candidateInfo => {
+            let id = Codecs.liteServer_nonfinal_candidateId.decode(decoder);
+            let available = decoder.readBool();
+            let approvedWeight = decoder.readInt64();
+            let signedWeight = decoder.readInt64();
+            let totalWeight = decoder.readInt64();
+            return { kind: 'liteServer.nonfinal.candidateInfo', id, available, approvedWeight, signedWeight, totalWeight };
+        },
+    } as TLCodec<liteServer_nonfinal_candidateInfo>,
+
+    liteServer_nonfinal_validatorGroupInfo: {
+        encode: (src: liteServer_nonfinal_validatorGroupInfo, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockId.encode(src.nextBlockId, encoder);
+            encoder.writeInt32(src.ccSeqno);
+            encoder.writeVector(Codecs.tonNode_blockIdExt.encode, src.prev);
+            encoder.writeVector(Codecs.liteServer_nonfinal_candidateInfo.encode, src.candidates);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_validatorGroupInfo => {
+            let nextBlockId = Codecs.tonNode_blockId.decode(decoder);
+            let ccSeqno = decoder.readInt32();
+            let prev = decoder.readVector(Codecs.tonNode_blockIdExt.decode);
+            let candidates = decoder.readVector(Codecs.liteServer_nonfinal_candidateInfo.decode);
+            return { kind: 'liteServer.nonfinal.validatorGroupInfo', nextBlockId, ccSeqno, prev, candidates };
+        },
+    } as TLCodec<liteServer_nonfinal_validatorGroupInfo>,
+
+    liteServer_nonfinal_validatorGroups: {
+        encode: (src: liteServer_nonfinal_validatorGroups, encoder: TLWriteBuffer) => {
+            encoder.writeVector(Codecs.liteServer_nonfinal_validatorGroupInfo.encode, src.groups);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_validatorGroups => {
+            let groups = decoder.readVector(Codecs.liteServer_nonfinal_validatorGroupInfo.decode);
+            return { kind: 'liteServer.nonfinal.validatorGroups', groups };
+        },
+    } as TLCodec<liteServer_nonfinal_validatorGroups>,
 
     liteServer_getMasterchainInfo: {
         encode: (src: liteServer_getMasterchainInfo, encoder: TLWriteBuffer) => {
@@ -1373,6 +1642,24 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_lookupBlock>,
 
+    liteServer_lookupBlockWithProof: {
+        encode: (src: liteServer_lookupBlockWithProof, encoder: TLWriteBuffer) => {
+            encoder.writeUInt32(src.mode);
+            Codecs.tonNode_blockId.encode(src.id, encoder);
+            Codecs.tonNode_blockIdExt.encode(src.mcBlockId, encoder);
+            (src.mode & (1 << 1)) && !!src.lt && encoder.writeInt64(src.lt);
+            (src.mode & (1 << 2)) && !!src.utime && encoder.writeInt32(src.utime);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_lookupBlockWithProof => {
+            let mode = decoder.readUInt32();
+            let id = Codecs.tonNode_blockId.decode(decoder);
+            let mcBlockId = Codecs.tonNode_blockIdExt.decode(decoder);
+            let lt = (mode & (1 << 1)) ? decoder.readInt64() : null;
+            let utime = (mode & (1 << 2)) ? decoder.readInt32() : null;
+            return { kind: 'liteServer.lookupBlockWithProof', mode, id, mcBlockId, lt, utime };
+        },
+    } as TLCodec<liteServer_lookupBlockWithProof>,
+
     liteServer_listBlockTransactions: {
         encode: (src: liteServer_listBlockTransactions, encoder: TLWriteBuffer) => {
             Codecs.tonNode_blockIdExt.encode(src.id, encoder);
@@ -1392,6 +1679,26 @@ export const Codecs = {
             return { kind: 'liteServer.listBlockTransactions', id, mode, count, after, reverseOrder, wantProof };
         },
     } as TLCodec<liteServer_listBlockTransactions>,
+
+    liteServer_listBlockTransactionsExt: {
+        encode: (src: liteServer_listBlockTransactionsExt, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockIdExt.encode(src.id, encoder);
+            encoder.writeUInt32(src.mode);
+            encoder.writeUInt32(src.count);
+            (src.mode & (1 << 7)) && !!src.after && Codecs.liteServer_transactionId3.encode(src.after, encoder);
+            (src.mode & (1 << 6)) && !!src.reverseOrder && encoder.writeBool(src.reverseOrder);
+            (src.mode & (1 << 5)) && !!src.wantProof && encoder.writeBool(src.wantProof);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_listBlockTransactionsExt => {
+            let id = Codecs.tonNode_blockIdExt.decode(decoder);
+            let mode = decoder.readUInt32();
+            let count = decoder.readUInt32();
+            let after = (mode & (1 << 7)) ? Codecs.liteServer_transactionId3.decode(decoder) : null;
+            let reverseOrder = (mode & (1 << 6)) ? decoder.readBool() : null;
+            let wantProof = (mode & (1 << 5)) ? decoder.readBool() : null;
+            return { kind: 'liteServer.listBlockTransactionsExt', id, mode, count, after, reverseOrder, wantProof };
+        },
+    } as TLCodec<liteServer_listBlockTransactionsExt>,
 
     liteServer_getBlockProof: {
         encode: (src: liteServer_getBlockProof, encoder: TLWriteBuffer) => {
@@ -1461,6 +1768,20 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_getLibraries>,
 
+    liteServer_getLibrariesWithProof: {
+        encode: (src: liteServer_getLibrariesWithProof, encoder: TLWriteBuffer) => {
+            Codecs.tonNode_blockIdExt.encode(src.id, encoder);
+            encoder.writeUInt32(src.mode);
+            encoder.writeVector((s, d) => d.writeInt256(s), src.libraryList);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_getLibrariesWithProof => {
+            let id = Codecs.tonNode_blockIdExt.decode(decoder);
+            let mode = decoder.readUInt32();
+            let libraryList = decoder.readVector((d) => d.readInt256());
+            return { kind: 'liteServer.getLibrariesWithProof', id, mode, libraryList };
+        },
+    } as TLCodec<liteServer_getLibrariesWithProof>,
+
     liteServer_getShardBlockProof: {
         encode: (src: liteServer_getShardBlockProof, encoder: TLWriteBuffer) => {
             Codecs.tonNode_blockIdExt.encode(src.id, encoder);
@@ -1470,6 +1791,30 @@ export const Codecs = {
             return { kind: 'liteServer.getShardBlockProof', id };
         },
     } as TLCodec<liteServer_getShardBlockProof>,
+
+    liteServer_nonfinal_getValidatorGroups: {
+        encode: (src: liteServer_nonfinal_getValidatorGroups, encoder: TLWriteBuffer) => {
+            encoder.writeUInt32(src.mode);
+            (src.mode & (1 << 0)) && !!src.wc && encoder.writeInt32(src.wc);
+            (src.mode & (1 << 1)) && !!src.shard && encoder.writeInt64(src.shard);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_getValidatorGroups => {
+            let mode = decoder.readUInt32();
+            let wc = (mode & (1 << 0)) ? decoder.readInt32() : null;
+            let shard = (mode & (1 << 1)) ? decoder.readInt64() : null;
+            return { kind: 'liteServer.nonfinal.getValidatorGroups', mode, wc, shard };
+        },
+    } as TLCodec<liteServer_nonfinal_getValidatorGroups>,
+
+    liteServer_nonfinal_getCandidate: {
+        encode: (src: liteServer_nonfinal_getCandidate, encoder: TLWriteBuffer) => {
+            Codecs.liteServer_nonfinal_candidateId.encode(src.id, encoder);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_getCandidate => {
+            let id = Codecs.liteServer_nonfinal_candidateId.decode(decoder);
+            return { kind: 'liteServer.nonfinal.getCandidate', id };
+        },
+    } as TLCodec<liteServer_nonfinal_getCandidate>,
 
     liteServer_queryPrefix: {
         encode: (src: liteServer_queryPrefix, encoder: TLWriteBuffer) => {
@@ -1965,6 +2310,25 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_BlockTransactions>,
 
+    liteServer_BlockTransactionsExt: {
+        encode: (src: liteServer_BlockTransactionsExt, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.blockTransactionsExt') {
+                encoder.writeInt32(-74449692);
+                Codecs.liteServer_blockTransactionsExt.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_BlockTransactionsExt => {
+            const kind = decoder.readInt32();
+            if (kind === -74449692) {
+                return Codecs.liteServer_blockTransactionsExt.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_BlockTransactionsExt>,
+
     liteServer_Signature: {
         encode: (src: liteServer_Signature, encoder: TLWriteBuffer) => {
             const kind = src.kind;
@@ -2106,6 +2470,25 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_LibraryResult>,
 
+    liteServer_LibraryResultWithProof: {
+        encode: (src: liteServer_LibraryResultWithProof, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.libraryResultWithProof') {
+                encoder.writeInt32(279521215);
+                Codecs.liteServer_libraryResultWithProof.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_LibraryResultWithProof => {
+            const kind = decoder.readInt32();
+            if (kind === 279521215) {
+                return Codecs.liteServer_libraryResultWithProof.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_LibraryResultWithProof>,
+
     liteServer_ShardBlockLink: {
         encode: (src: liteServer_ShardBlockLink, encoder: TLWriteBuffer) => {
             const kind = src.kind;
@@ -2144,6 +2527,25 @@ export const Codecs = {
         },
     } as TLCodec<liteServer_ShardBlockProof>,
 
+    liteServer_LookupBlockResult: {
+        encode: (src: liteServer_LookupBlockResult, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.lookupBlockResult') {
+                encoder.writeInt32(-1720161305);
+                Codecs.liteServer_lookupBlockResult.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_LookupBlockResult => {
+            const kind = decoder.readInt32();
+            if (kind === -1720161305) {
+                return Codecs.liteServer_lookupBlockResult.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_LookupBlockResult>,
+
     liteServer_debug_Verbosity: {
         encode: (src: liteServer_debug_Verbosity, encoder: TLWriteBuffer) => {
             const kind = src.kind;
@@ -2162,5 +2564,100 @@ export const Codecs = {
             throw Error('Unknown type: ' + kind);
         },
     } as TLCodec<liteServer_debug_Verbosity>,
+
+    liteServer_nonfinal_CandidateId: {
+        encode: (src: liteServer_nonfinal_CandidateId, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.nonfinal.candidateId') {
+                encoder.writeInt32(1426358254);
+                Codecs.liteServer_nonfinal_candidateId.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_CandidateId => {
+            const kind = decoder.readInt32();
+            if (kind === 1426358254) {
+                return Codecs.liteServer_nonfinal_candidateId.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_nonfinal_CandidateId>,
+
+    liteServer_nonfinal_Candidate: {
+        encode: (src: liteServer_nonfinal_Candidate, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.nonfinal.candidate') {
+                encoder.writeInt32(-2134686068);
+                Codecs.liteServer_nonfinal_candidate.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_Candidate => {
+            const kind = decoder.readInt32();
+            if (kind === -2134686068) {
+                return Codecs.liteServer_nonfinal_candidate.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_nonfinal_Candidate>,
+
+    liteServer_nonfinal_CandidateInfo: {
+        encode: (src: liteServer_nonfinal_CandidateInfo, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.nonfinal.candidateInfo') {
+                encoder.writeInt32(1307312597);
+                Codecs.liteServer_nonfinal_candidateInfo.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_CandidateInfo => {
+            const kind = decoder.readInt32();
+            if (kind === 1307312597) {
+                return Codecs.liteServer_nonfinal_candidateInfo.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_nonfinal_CandidateInfo>,
+
+    liteServer_nonfinal_ValidatorGroupInfo: {
+        encode: (src: liteServer_nonfinal_ValidatorGroupInfo, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.nonfinal.validatorGroupInfo') {
+                encoder.writeInt32(-103380313);
+                Codecs.liteServer_nonfinal_validatorGroupInfo.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_ValidatorGroupInfo => {
+            const kind = decoder.readInt32();
+            if (kind === -103380313) {
+                return Codecs.liteServer_nonfinal_validatorGroupInfo.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_nonfinal_ValidatorGroupInfo>,
+
+    liteServer_nonfinal_ValidatorGroups: {
+        encode: (src: liteServer_nonfinal_ValidatorGroups, encoder: TLWriteBuffer) => {
+            const kind = src.kind;
+            if (kind === 'liteServer.nonfinal.validatorGroups') {
+                encoder.writeInt32(-1928618498);
+                Codecs.liteServer_nonfinal_validatorGroups.encode(src, encoder);
+                return;
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+        decode: (decoder: TLReadBuffer): liteServer_nonfinal_ValidatorGroups => {
+            const kind = decoder.readInt32();
+            if (kind === -1928618498) {
+                return Codecs.liteServer_nonfinal_validatorGroups.decode(decoder);
+            }
+            throw Error('Unknown type: ' + kind);
+        },
+    } as TLCodec<liteServer_nonfinal_ValidatorGroups>,
 
 };

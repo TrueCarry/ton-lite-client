@@ -474,6 +474,13 @@ export class LiteClient {
         }, queryArgs);
     }
 
+    getBlockData = async (block: BlockID, queryArgs?: QueryArgs) => {
+        return this.engine.query(Functions.liteServer_getBlock, {
+            kind: 'liteServer.getBlock',
+            id: block
+        }, queryArgs);
+    }
+
     getFullBlock = async (seqno: number) => {
 
         // MC Blocks
